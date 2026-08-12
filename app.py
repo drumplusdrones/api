@@ -186,13 +186,17 @@ def update_task():
 
             }), 400
 
-        # Values coming from Zapier
+        # Values from Zapier
 
         enquiry_received_date = data.get("enquiry_received_date")
+
+        enquiry_destination = data.get("enquiry_destination")
 
         wedding_date = data.get("wedding_date")
 
         wedding_location = data.get("wedding_location")
+
+        wedding_package = data.get("wedding_package")
 
         wedding_message = data.get("wedding_message")
 
@@ -201,6 +205,8 @@ def update_task():
         # Build Wrike custom fields
 
         custom_fields = []
+
+        # Enquiry Received Date
 
         if enquiry_received_date:
 
@@ -212,15 +218,55 @@ def update_task():
 
             })
 
+        # Enquiry Destination - Dropdown
+
+        if enquiry_destination:
+
+            allowed_destinations = [
+
+                "Meta",
+
+                "Hitched",
+
+                "Webflow",
+
+                "Unspecified"
+
+            ]
+
+            if enquiry_destination not in allowed_destinations:
+
+                return jsonify({
+
+                    "success": False,
+
+                    "error": "Invalid enquiry_destination",
+
+                    "allowed_values": allowed_destinations
+
+                }), 400
+
+            custom_fields.append({
+
+                "id": "IEAG4PFKJUANASQZ",
+
+                "value": enquiry_destination
+
+            })
+
+        # Wedding Date
+
         if wedding_date:
 
             custom_fields.append({
 
-                "id": "IEAG4PFKJUANAO4E",
+                "id": "IEAG4PFKHUANAO4E",
 
                 "value": wedding_date
 
             })
+
+        # Wedding Location
 
         if wedding_location:
 
@@ -232,6 +278,44 @@ def update_task():
 
             })
 
+        # Wedding Package - Dropdown
+
+        if wedding_package:
+
+            allowed_packages = [
+
+                "Wedding Solo Bagpiper",
+
+                "Wedding Bagpiper & Drummer",
+
+                "Wedding Mini Pipe Band",
+
+                "To be decided…"
+
+            ]
+
+            if wedding_package not in allowed_packages:
+
+                return jsonify({
+
+                    "success": False,
+
+                    "error": "Invalid wedding_package",
+
+                    "allowed_values": allowed_packages
+
+                }), 400
+
+            custom_fields.append({
+
+                "id": "IEAG4PFKJUANAO4I",
+
+                "value": wedding_package
+
+            })
+
+        # Wedding Message
+
         if wedding_message:
 
             custom_fields.append({
@@ -241,6 +325,8 @@ def update_task():
                 "value": wedding_message
 
             })
+
+        # Gmail Thread ID
 
         if gmail_thread_id:
 
@@ -266,7 +352,7 @@ def update_task():
 
         print("CUSTOM FIELDS:", custom_fields)
 
-        # Update Wrike
+        # Send update to Wrike
 
         response = requests.put(
 
