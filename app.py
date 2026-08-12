@@ -158,111 +158,183 @@ def wrike_test():
 
 def update_task():
 
-    access_token = app.config.get("WRIKE_ACCESS_TOKEN")
+    try:
 
-    if not access_token:
+        access_token = app.config.get("WRIKE_ACCESS_TOKEN")
+
+        if not access_token:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "Not authenticated with Wrike"
+
+            }), 401
+
+        data = request.get_json(silent=True) or {}
+
+        task_id = data.get("task_id")
+
+        if not task_id:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "task_id is required"
+
+            }), 400
+
+        # Values coming from Zapier
+
+        enquiry_received_date = data.get("enquiry_received_date")
+
+        enquiry_destination = data.get("enquiry_destination")
+
+        wedding_date = data.get("wedding_date")
+
+        wedding_location = data.get("wedding_location")
+
+        wedding_package = data.get("wedding_package")
+
+        wedding_message = data.get("wedding_message")
+
+        gmail_thread_id = data.get("gmail_thread_id")
+
+        # Build Wrike custom fields
+
+        custom_fields = []
+
+        if enquiry_received_date:
+
+            custom_fields.append({
+
+                "id": "YOUR_ENQUIRY_RECEIVED_DATE_FIELD_ID",
+
+                "value": enquiry_received_date
+
+            })
+
+        if enquiry_destination:
+
+            custom_fields.append({
+
+                "id": "YOUR_ENQUIRY_DESTINATION_FIELD_ID",
+
+                "value": enquiry_destination
+
+            })
+
+        if wedding_date:
+
+            custom_fields.append({
+
+                "id": "YOUR_WEDDING_DATE_FIELD_ID",
+
+                "value": wedding_date
+
+            })
+
+        if wedding_location:
+
+            custom_fields.append({
+
+                "id": "YOUR_WEDDING_LOCATION_FIELD_ID",
+
+                "value": wedding_location
+
+            })
+
+        if wedding_package:
+
+            custom_fields.append({
+
+                "id": "YOUR_WEDDING_PACKAGE_FIELD_ID",
+
+                "value": wedding_package
+
+            })
+
+        if wedding_message:
+
+            custom_fields.append({
+
+                "id": "YOUR_WEDDING_MESSAGE_FIELD_ID",
+
+                "value": wedding_message
+
+            })
+
+        if gmail_thread_id:
+
+            custom_fields.append({
+
+                "id": "YOUR_GMAIL_THREAD_ID_FIELD_ID",
+
+                "value": gmail_thread_id
+
+            })
+
+        if not custom_fields:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "No custom field values were supplied"
+
+            }), 400
+
+        # Update Wrike
+
+        response = requests.put(
+
+            f"https://www.wrike.com/api/v4/tasks/{task_id}",
+
+            headers={
+
+                "Authorization": f"Bearer {access_token}",
+
+                "Content-Type": "application/json"
+
+            },
+
+            json={
+
+                "customFields": custom_fields
+
+            }
+
+        )
+
+        try:
+
+            wrike_response = response.json()
+
+        except ValueError:
+
+            wrike_response = response.text
+
+        return jsonify({
+
+            "success": response.ok,
+
+            "wrike_status": response.status_code,
+
+            "wrike_response": wrike_response
+
+        }), 200
+
+    except Exception as e:
 
         return jsonify({
 
             "success": False,
 
-            "error": "Not authenticated with Wrike"
+            "error": str(e)
 
-        }), 401
-
-    data = request.json or {}
-
-    task_id = data.get("task_id")
-
-    custom_fields = data.get("custom_fields", [])
-
-    if not task_id:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "task_id is required"
-
-        }), 400
-
-    if not custom_fields:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "custom_fields is required"
-
-        }), 400
-
-    response = requests.put(
-
-        f"https://www.wrike.com/api/v4/tasks/{task_id}",
-
-        headers={
-
-            "Authorization": f"Bearer {access_token}"
-
-        },
-
-        json={
-
-            "customFields": custom_fields
-
-        }
-
-    )
-
-    return jsonify({
-
-        "status_code": response.status_code,
-
-        "wrike_response": response.json()
-
-    }), response.status_code
-
-@app.route("/tasks", methods=["GET"])
-
-def get_tasks():
-
-    access_token = app.config.get("WRIKE_ACCESS_TOKEN")
-
-    if not access_token:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "Not authenticated with Wrike"
-
-        }), 401
-
-    response = requests.get(
-
-        "https://www.wrike.com/api/v4/tasks",
-
-        headers={
-
-            "Authorization": f"Bearer {access_token}"
-
-        },
-
-        params={
-
-            "pageSize": 20
-
-        }
-
-    )
-
-    return jsonify({
-
-        "status_code": response.status_code,
-
-        "wrike_response": response.json()
-
-    }), response.status_code
+        }), 500
 
 if __name__ == "__main__":
 
