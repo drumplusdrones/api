@@ -337,7 +337,18 @@ def update_task():
                 "value": gmail_thread_id
 
             })
+        # Standard Wrike task Status
 
+        update_data = {
+
+            "customFields": custom_fields
+
+        }
+
+        if status:
+
+            update_data["status"] = status
+        
         if not custom_fields:
 
             return jsonify({
@@ -366,9 +377,7 @@ def update_task():
 
             },
 
-            json={
-
-                "customFields": custom_fields
+            json=update_data
 
             }
 
