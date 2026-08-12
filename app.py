@@ -222,6 +222,48 @@ def update_task():
 
     }), response.status_code
 
+@app.route("/tasks", methods=["GET"])
+
+def get_tasks():
+
+    access_token = app.config.get("WRIKE_ACCESS_TOKEN")
+
+    if not access_token:
+
+        return jsonify({
+
+            "success": False,
+
+            "error": "Not authenticated with Wrike"
+
+        }), 401
+
+    response = requests.get(
+
+        "https://www.wrike.com/api/v4/tasks",
+
+        headers={
+
+            "Authorization": f"Bearer {access_token}"
+
+        },
+
+        params={
+
+            "pageSize": 20
+
+        }
+
+    )
+
+    return jsonify({
+
+        "status_code": response.status_code,
+
+        "wrike_response": response.json()
+
+    }), response.status_code
+
 if __name__ == "__main__":
 
     app.run(
