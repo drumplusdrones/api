@@ -190,13 +190,9 @@ def update_task():
 
         enquiry_received_date = data.get("enquiry_received_date")
 
-        enquiry_destination = data.get("enquiry_destination")
-
         wedding_date = data.get("wedding_date")
 
         wedding_location = data.get("wedding_location")
-
-        wedding_package = data.get("wedding_package")
 
         wedding_message = data.get("wedding_message")
 
@@ -210,19 +206,9 @@ def update_task():
 
             custom_fields.append({
 
-                "id": "YOUR_ENQUIRY_RECEIVED_DATE_FIELD_ID",
+                "id": "IEAG4PFKJUANASXF",
 
                 "value": enquiry_received_date
-
-            })
-
-        if enquiry_destination:
-
-            custom_fields.append({
-
-                "id": "YOUR_ENQUIRY_DESTINATION_FIELD_ID",
-
-                "value": enquiry_destination
 
             })
 
@@ -230,7 +216,7 @@ def update_task():
 
             custom_fields.append({
 
-                "id": "YOUR_WEDDING_DATE_FIELD_ID",
+                "id": "IEAG4PFKHUANAO4E",
 
                 "value": wedding_date
 
@@ -240,19 +226,9 @@ def update_task():
 
             custom_fields.append({
 
-                "id": "YOUR_WEDDING_LOCATION_FIELD_ID",
+                "id": "IEAG4PFKJUANAO4G",
 
                 "value": wedding_location
-
-            })
-
-        if wedding_package:
-
-            custom_fields.append({
-
-                "id": "YOUR_WEDDING_PACKAGE_FIELD_ID",
-
-                "value": wedding_package
 
             })
 
@@ -260,7 +236,7 @@ def update_task():
 
             custom_fields.append({
 
-                "id": "YOUR_WEDDING_MESSAGE_FIELD_ID",
+                "id": "IEAG4PFKJUANAO4Q",
 
                 "value": wedding_message
 
@@ -270,7 +246,7 @@ def update_task():
 
             custom_fields.append({
 
-                "id": "YOUR_GMAIL_THREAD_ID_FIELD_ID",
+                "id": "IEAG4PFKJUANASQ6",
 
                 "value": gmail_thread_id
 
@@ -285,6 +261,10 @@ def update_task():
                 "error": "No custom field values were supplied"
 
             }), 400
+
+        print("TASK ID:", task_id)
+
+        print("CUSTOM FIELDS:", custom_fields)
 
         # Update Wrike
 
@@ -308,6 +288,10 @@ def update_task():
 
         )
 
+        print("WRIKE STATUS:", response.status_code)
+
+        print("WRIKE RESPONSE:", response.text)
+
         try:
 
             wrike_response = response.json()
@@ -328,6 +312,8 @@ def update_task():
 
     except Exception as e:
 
+        print("SERVER ERROR:", str(e))
+
         return jsonify({
 
             "success": False,
@@ -335,7 +321,7 @@ def update_task():
             "error": str(e)
 
         }), 500
-
+        
 if __name__ == "__main__":
 
     app.run(
