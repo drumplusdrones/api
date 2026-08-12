@@ -158,69 +158,19 @@ def wrike_test():
 
 def update_task():
 
-    access_token = app.config.get("WRIKE_ACCESS_TOKEN")
-
-    if not access_token:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "Not authenticated with Wrike"
-
-        }), 401
-
     data = request.json or {}
 
-    task_id = data.get("task_id")
+    print("DATA RECEIVED FROM ZAPIER:")
 
-    title = data.get("title")
-
-    if not task_id:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "task_id is required"
-
-        }), 400
-
-    if not title:
-
-        return jsonify({
-
-            "success": False,
-
-            "error": "title is required"
-
-        }), 400
-
-    response = requests.put(
-
-        f"https://www.wrike.com/api/v4/tasks/{task_id}",
-
-        headers={
-
-            "Authorization": f"Bearer {access_token}"
-
-        },
-
-        data={
-
-            "title": title
-
-        }
-
-    )
+    print(data)
 
     return jsonify({
 
-        "status_code": response.status_code,
+        "success": True,
 
-        "wrike_response": response.json()
+        "received": data
 
-    }), response.status_code
+    }), 200
 
 if __name__ == "__main__":
 
