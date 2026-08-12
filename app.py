@@ -1,23 +1,16 @@
 import os
+
 import requests
 
 from flask import Flask, request, jsonify, redirect
 
 app = Flask(__name__)
 
-# -------------------------
-# Basic test
-# -------------------------
-
 @app.route("/", methods=["GET"])
 
 def home():
 
     return "My API is running!"
-
-# -------------------------
-# Zapier webhook
-# -------------------------
 
 @app.route("/webhook", methods=["POST"])
 
@@ -39,21 +32,17 @@ def webhook():
 
     }), 200
 
-# -------------------------
-# Start Wrike OAuth
-# -------------------------
-
 @app.route("/oauth/start", methods=["GET"])
 
 def oauth_start():
 
     client_id = os.environ.get("WRIKE_CLIENT_ID")
 
+    redirect_uri = os.environ.get("WRIKE_REDIRECT_URI")
+
     if not client_id:
 
         return "WRIKE_CLIENT_ID is not configured", 500
-
-    redirect_uri = os.environ.get("WRIKE_REDIRECT_URI")
 
     if not redirect_uri:
 
@@ -73,10 +62,6 @@ def oauth_start():
 
     return redirect(authorization_url)
 
-# -------------------------
-# Wrike OAuth callback
-# -------------------------
-
 @app.route("/oauth/callback", methods=["GET"])
 
 def oauth_callback():
@@ -85,19 +70,13 @@ def oauth_callback():
 
     if not code:
 
-        error = request.args.get("error")
-
-        return f"Wrike authorization failed: {error}", 400
+        return "Wrike authorization failed", 400
 
     client_id = os.environ.get("WRIKE_CLIENT_ID")
 
     client_secret = os.environ.get("WRIKE_CLIENT_SECRET")
 
     redirect_uri = os.environ.get("WRIKE_REDIRECT_URI")
-
-    if not client_id or not client_secret or not redirect_uri:
-
-        return "Wrike OAuth environment variables are not configured", 500
 
     response = requests.post(
 
@@ -131,25 +110,49 @@ def oauth_callback():
 
     tokens = response.json()
 
-    print("Wrike OAuth successful")
+    # For this test we store the token temporarily
 
-    print("Access token received")
+    # in the running server process.
 
-    print("Refresh token received")
-
-    print("Wrike host:", tokens.get("host"))
+    app.config["WRIKE_ACCESS_TOKEN"] = tokens["access_token"]
 
     return jsonify({
 
         "success": True,
 
-        "message": "Wrike authorization successful",
-
-        "host": tokens.get("host"),
-
-        "expires_in": tokens.get("expires_in")
+        "message": "Wrike authorization successful"
 
     })
+
+@app.route("/wrike-test", methods=["GET"])
+
+def wrike_test():
+
+    access_token = app.config.get("WRIKE_ACCESS_TOKEN")
+
+    if not access_token:
+
+        return "No Wrike access token. Visit /oauth/start first.", 401
+
+    response = requests.get(
+
+        "https://www.wrike.com/api/v4/contacts",
+
+        headers={
+
+            "Authorization": f"Bearer {access_token}"
+
+        }
+
+    )
+
+    return jsonify({
+
+        "status_code": response.status_code,
+
+        "wrike_response": response.json()
+
+    }), response.status_code
 
 if __name__ == "__main__":
 
