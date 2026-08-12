@@ -174,7 +174,7 @@ def update_task():
 
     task_id = data.get("task_id")
 
-    title = data.get("title")
+    custom_fields = data.get("custom_fields", [])
 
     if not task_id:
 
@@ -186,13 +186,13 @@ def update_task():
 
         }), 400
 
-    if not title:
+    if not custom_fields:
 
         return jsonify({
 
             "success": False,
 
-            "error": "title is required"
+            "error": "custom_fields is required"
 
         }), 400
 
@@ -206,9 +206,9 @@ def update_task():
 
         },
 
-        data={
+        json={
 
-            "title": title
+            "customFields": custom_fields
 
         }
 
